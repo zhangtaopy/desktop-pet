@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Sprites</title>
+</head>
+<body>
+  <h2>Idle Sprite (128x32)</h2>
+  <canvas id="idle" width="128" height="32"></canvas>
+  <h2>Walk Sprite (128x32)</h2>
+  <canvas id="walk" width="128" height="32"></canvas>
+  <h2>Sleep Sprite (64x32)</h2>
+  <canvas id="sleep" width="64" height="32"></canvas>
+  <script>
+    // Draw a simple pixel cat
+    function drawPixelCat(ctx, x, y, frame, type) {
+      ctx.imageSmoothingEnabled = false;
+
+      // Body color
+      const bodyColor = '#FFB6C1';  // Light pink
+      const eyeColor = '#333';
+      const noseColor = '#FF69B4';
+
+      // Simple 16x16 pixel cat centered in 32x32 frame
+      const offsetX = x + 8;
+      const offsetY = y + 8;
+
+      // Body (8x6 rectangle)
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(offsetX + 4, offsetY + 10, 8, 6);
+
+      // Head (6x6)
+      ctx.fillRect(offsetX + 5, offsetY + 4, 6, 6);
+
+      // Ears
+      ctx.fillRect(offsetX + 5, offsetY + 2, 2, 2);
+      ctx.fillRect(offsetX + 9, offsetY + 2, 2, 2);
+
+      // Eyes (different per frame for animation)
+      ctx.fillStyle = eyeColor;
+      if (type === 'idle') {
+        // Blinking animation
+        if (frame === 2) {
+          ctx.fillRect(offsetX + 6, offsetY + 6, 1, 1);
+          ctx.fillRect(offsetX + 9, offsetY + 6, 1, 1);
+        } else {
+          ctx.fillRect(offsetX + 6, offsetY + 5, 2, 2);
+          ctx.fillRect(offsetX + 9, offsetY + 5, 2, 2);
+        }
+      } else if (type === 'walk') {
+        // Walking - slight body movement
+        const bob = frame % 2 === 0 ? 0 : 1;
+        ctx.fillStyle = bodyColor;
+        ctx.fillRect(offsetX + 4, offsetY + 10 - bob, 8, 6);
+        ctx.fillRect(offsetX + 5, offsetY + 4 - bob, 6, 6);
+        ctx.fillRect(offsetX + 5, offsetY + 2 - bob, 2, 2);
+        ctx.fillRect(offsetX + 9, offsetY + 2 - bob, 2, 2);
+        ctx.fillStyle = eyeColor;
+        ctx.fillRect(offsetX + 6, offsetY + 5 - bob, 2, 2);
+        ctx.fillRect(offsetX + 9, offsetY + 5 - bob, 2, 2);
+      } else if (type === 'sleep') {
+        // Sleeping - closed eyes (lines)
+        ctx.fillRect(offsetX + 6, offsetY + 6, 2, 1);
+        ctx.fillRect(offsetX + 9, offsetY + 6, 2, 1);
+      }
+
+      // Nose
+      ctx.fillStyle = noseColor;
+      ctx.fillRect(offsetX + 7, offsetY + 7, 2, 1);
+
+      // Tail
+      ctx.fillStyle = bodyColor;
+      if (type === 'idle') {
+        ctx.fillRect(offsetX + 12, offsetY + 12 + (frame % 2), 2, 3);
+      } else if (type === 'walk') {
+        ctx.fillRect(offsetX + 12, offsetY + 11, 3, 2);
+      } else {
+        ctx.fillRect(offsetX + 12, offsetY + 12, 2, 2);
+      }
+    }
+
+    // Generate idle sprite (4 frames)
+    const idleCanvas = document.getElementById('idle');
+    const idleCtx = idleCanvas.getContext('2d');
+    idleCtx.fillStyle = 'transparent';
+    idleCtx.clearRect(0, 0, 128, 32);
+    for (let i = 0; i < 4; i++) {
+      drawPixelCat(idleCtx, i * 32, 0, i, 'idle');
+    }
+
+    // Generate walk sprite (4 frames)
+    const walkCanvas = document.getElementById('walk');
+    const walkCtx = walkCanvas.getContext('2d');
+    walkCtx.fillStyle = 'transparent';
+    walkCtx.clearRect(0, 0, 128, 32);
+    for (let i = 0; i < 4; i++) {
+      drawPixelCat(walkCtx, i * 32, 0, i, 'walk');
+    }
+
+    // Generate sleep sprite (2 frames)
+    const sleepCanvas = document.getElementById('sleep');
+    const sleepCtx = sleepCanvas.getContext('2d');
+    sleepCtx.fillStyle = 'transparent';
+    sleepCtx.clearRect(0, 0, 64, 32);
+    for (let i = 0; i < 2; i++) {
+      drawPixelCat(sleepCtx, i * 32, 0, i, 'sleep');
+      // Add Z's for sleeping
+      sleepCtx.fillStyle = '#666';
+      sleepCtx.font = '6px sans-serif';
+      sleepCtx.fillText('z', 24 + i * 32, 8);
+      if (i === 1) {
+        sleepCtx.fillText('Z', 28, 4);
+      }
+    }
+  </script>
+</body>
+</html>

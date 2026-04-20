@@ -1,0 +1,103 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 128px;
+  height: 128px;
+  background: transparent !important;
+  background-color: transparent !important;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#app {
+  width: 128px;
+  height: 128px;
+  position: relative;
+  background: transparent;
+}
+
+#pet-canvas {
+  width: 128px;
+  height: 128px;
+  cursor: grab;
+  background: transparent;
+}
+
+#pet-canvas:active {
+  cursor: grabbing;
+}
+
+/* 测试菜单按钮 */
+#test-menu-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s, border 0.2s, opacity 0.3s;
+  opacity: 1;
+}
+
+#test-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+#test-menu-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 测试菜单面板 - 覆盖在宠物上 */
+#test-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+}
+
+#test-menu.hidden {
+  display: none;
+}
+
+#test-menu button {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+#test-menu button:hover {
+  background: #e0e0e0;
+}
+
+#test-menu button:active {
+  background: #d0d0d0;
+}
