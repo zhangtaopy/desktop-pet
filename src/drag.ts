@@ -29,9 +29,11 @@ export function initDrag(canvas: HTMLCanvasElement, callbacks?: DragCallbacks): 
 
     try {
       const position = await win.outerPosition();
+      // 将鼠标的逻辑像素转换为物理像素，统一坐标系
+      const scaleFactor = window.devicePixelRatio || 1;
       dragStart = {
-        x: e.screenX - position.x,
-        y: e.screenY - position.y
+        x: e.screenX * scaleFactor - position.x,
+        y: e.screenY * scaleFactor - position.y
       };
     } catch (err) {
       console.error('获取窗口位置失败:', err);
@@ -45,11 +47,13 @@ export function initDrag(canvas: HTMLCanvasElement, callbacks?: DragCallbacks): 
       callbacks?.onDragMove?.();
     }
 
-    const newX = e.screenX - dragStart.x;
-    const newY = e.screenY - dragStart.y;
+    // 将鼠标的逻辑像素转换为物理像素
+    const scaleFactor = window.devicePixelRatio || 1;
+    const newX = e.screenX * scaleFactor - dragStart.x;
+    const newY = e.screenY * scaleFactor - dragStart.y;
 
     try {
-      await win.setPosition({ type: 'Physical', x: newX, y: newY });
+      await win.setPosition({ type: 'Physical', x: Math.round(newX), y: Math.round(newY) });
     } catch (err) {
       console.error('设置窗口位置失败:', err);
     }
