@@ -220,4 +220,11 @@ export class InteractionHandler {
       this.chasingController.updateConfig(config.chasing);
     }
   }
+
+  /**
+   * 设置缩放因子
+   */
+  setScaleFactor(factor: number): void {
+    this.chasingController.setScaleFactor(factor);
+  }
 }

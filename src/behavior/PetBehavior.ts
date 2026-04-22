@@ -165,6 +165,7 @@ export class PetBehavior {
    */
   setScaleFactor(factor: number): void {
     this.movement.setScaleFactor(factor);
+    this.interaction.setScaleFactor(factor);
   }
 
   /**

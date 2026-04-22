@@ -53,13 +53,16 @@ export class ChasingController {
   private state: ChasingState = ChasingState.Idle;
   private callbacks: ChasingCallbacks;
 
-  // 目标追踪
+  // 目标追踪（物理坐标）
   private targetPosition: Position | null = null;
   private lastTargetUpdateTime: number = 0;
   private lastPetTime: number = 0;
 
-  // 当前宠物位置（用于计算距离）
+  // 当前宠物位置（物理坐标，用于计算距离）
   private currentPosition: Position = { x: 0, y: 0 };
+
+  // 缩放因子
+  private scaleFactor: number = 1;
 
   constructor(config: Partial<ChasingConfig> = {}, callbacks: ChasingCallbacks = {}) {
     this.config = { ...DEFAULT_CHASING_CONFIG, ...config };
@@ -67,7 +70,15 @@ export class ChasingController {
   }
 
   /**
+   * 设置缩放因子
+   */
+  setScaleFactor(factor: number): void {
+    this.scaleFactor = factor;
+  }
+
+  /**
    * 更新宠物当前位置
+   * @param position 物理坐标
    */
   setCurrentPosition(position: Position): void {
     this.currentPosition = { ...position };
@@ -78,10 +89,10 @@ export class ChasingController {
    * @param position 鼠标在屏幕上的物理坐标
    */
   updateMousePosition(position: Position): void {
-    // 转换为目标位置（考虑偏移）
+    // 目标已经是物理坐标，考虑偏移后存储
     this.targetPosition = {
-      x: position.x - this.config.targetOffsetX,
-      y: position.y - this.config.targetOffsetY,
+      x: position.x - this.config.targetOffsetX * this.scaleFactor,
+      y: position.y - this.config.targetOffsetY * this.scaleFactor,
     };
     this.lastTargetUpdateTime = Date.now();
 

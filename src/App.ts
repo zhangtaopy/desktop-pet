@@ -532,7 +532,9 @@ export class App {
       }
 
       if (pos) {
-        petBehavior.setTarget(pos.x, pos.y);
+        // 将鼠标逻辑坐标转换为物理坐标，与窗口坐标系保持一致
+        const scaleFactor = this.services.screenBounds?.scaleFactor ?? window.devicePixelRatio ?? 1;
+        petBehavior.setTarget(pos.x * scaleFactor, pos.y * scaleFactor);
         return true;
       }
     } catch (e) {
