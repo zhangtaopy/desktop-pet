@@ -272,6 +272,12 @@ export class PetBehavior {
     // 更新交互状态
     const interactionState = this.interaction.update();
 
+    // 同步鼠标目标给状态机（用于自动触发追逐）
+    const chasingController = this.interaction.getChasingController();
+    const target = chasingController.getTargetPosition();
+    const distance = chasingController.getDistanceToTarget();
+    this.stateMachine.setHasMouseTarget(!!target, distance);
+
     // 更新状态机
     this.stateMachine.update();
 
@@ -342,7 +348,10 @@ export class PetBehavior {
         break;
 
       case PetState.ChasingMouse:
-        // 追逐在 handleChaseStart 中处理
+        // 确保追逐控制器开始工作
+        if (!this.interaction.getChasingController().isChasing()) {
+          this.interaction.startChasing();
+        }
         break;
 
       case PetState.Idle:
