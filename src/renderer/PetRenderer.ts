@@ -1,13 +1,8 @@
 import { SpriteRenderer, SpriteConfig } from './SpriteRenderer';
+import { PetAnimation } from '../core/EventBus';
 
-export enum PetAnimation {
-  Idle = 'idle',
-  Walk = 'walk',
-  Run = 'run',        // 奔跑
-  Sleep = 'sleep',
-  Petting = 'petting',  // 抚摸动画
-  Happy = 'happy',      // 开心表情
-}
+// 重新导出 PetAnimation 以保持兼容性
+export { PetAnimation };
 
 interface PixelColor {
   body: string;

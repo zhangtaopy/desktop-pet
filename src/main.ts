@@ -3,7 +3,7 @@ import { cursorPosition, currentMonitor, primaryMonitor } from '@tauri-apps/api/
 import { listen } from '@tauri-apps/api/event';
 import { initDrag } from './drag';
 import { PetRenderer } from './renderer/PetRenderer';
-import { PetBehavior } from './renderer/PetBehavior';
+import { PetBehavior } from './behavior/PetBehavior';
 import { TimeManager } from './renderer/TimeManager';
 
 const tauri = (window as any).__TAURI__;
