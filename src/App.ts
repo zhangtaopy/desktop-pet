@@ -304,9 +304,32 @@ export class App {
 
   private async getScreenBounds(): Promise<ScreenBounds> {
     try {
-      const { currentMonitor, primaryMonitor } = await import('@tauri-apps/api/window');
-      const monitor = await currentMonitor() ?? await primaryMonitor();
+      const { availableMonitors, primaryMonitor } = await import('@tauri-apps/api/window');
 
+      // 获取所有显示器
+      const monitors = await availableMonitors();
+
+      if (monitors && monitors.length > 0) {
+        // 计算虚拟桌面边界（包含所有显示器）
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+        let scaleFactor = 1;
+
+        for (const monitor of monitors) {
+          minX = Math.min(minX, monitor.position.x);
+          minY = Math.min(minY, monitor.position.y);
+          maxX = Math.max(maxX, monitor.position.x + monitor.size.width);
+          maxY = Math.max(maxY, monitor.position.y + monitor.size.height);
+          scaleFactor = monitor.scaleFactor;
+        }
+
+        console.log('虚拟桌面边界:', { minX, maxX, minY, maxY, monitors: monitors.length });
+
+        return { minX, maxX, minY, maxY, scaleFactor };
+      }
+
+      // Fallback: 单显示器
+      const monitor = await primaryMonitor();
       if (monitor) {
         console.log('Monitor info:', {
           position: monitor.position,
@@ -503,7 +526,11 @@ export class App {
       } catch (e) {
         console.error('Failed to sync position:', e);
       }
-      petBehavior.forceChase();
+
+      const success = petBehavior.forceChase();
+      if (!success) {
+        console.log('[App] Cannot chase: pet is in cooldown after petting');
+      }
     }
 
     // 隐藏菜单
