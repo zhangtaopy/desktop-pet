@@ -446,12 +446,18 @@ export class App {
 
     // 点击抚摸
     let lastClickTime = 0;
-    canvas.addEventListener('click', () => {
+    canvas.addEventListener('mousedown', () => {
       if (this.isDragging) return;
       const now = Date.now();
       if (now - lastClickTime < 300) return;
       lastClickTime = now;
       petBehavior.startPetting();
+    });
+    canvas.addEventListener('mouseup', () => {
+      petBehavior.stopPetting();
+    });
+    canvas.addEventListener('mouseleave', () => {
+      petBehavior.stopPetting();
     });
 
     // 菜单

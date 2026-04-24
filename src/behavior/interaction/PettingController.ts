@@ -8,14 +8,10 @@
  */
 export interface PettingConfig {
   minDuration: number; // 最小抚摸持续时间
-  happyDuration: number; // 开心状态持续时间
-  cooldownDuration: number; // 抚摸后的追逐冷却时间
 }
 
 export const DEFAULT_PETTING_CONFIG: PettingConfig = {
   minDuration: 500, // 500ms 视为有效抚摸
-  happyDuration: 1000, // 开心1秒
-  cooldownDuration: 300000, // 5分钟冷却
 };
 
 /**
@@ -24,8 +20,6 @@ export const DEFAULT_PETTING_CONFIG: PettingConfig = {
 export enum PettingState {
   None = 'none',
   Petting = 'petting',
-  Happy = 'happy',
-  Cooldown = 'cooldown',
 }
 
 /**
@@ -34,9 +28,6 @@ export enum PettingState {
 export interface PettingCallbacks {
   onPetStart?: () => void;
   onPetEnd?: () => void;
-  onHappyStart?: () => void;
-  onHappyEnd?: () => void;
-  onCooldownStart?: () => void;
 }
 
 /**
@@ -46,7 +37,6 @@ export class PettingController {
   private config: PettingConfig;
   private state: PettingState = PettingState.None;
   private petStartTime: number = 0;
-  private stateEndTime: number = 0;
   private callbacks: PettingCallbacks;
 
   constructor(config: Partial<PettingConfig> = {}, callbacks: PettingCallbacks = {}) {
@@ -58,11 +48,7 @@ export class PettingController {
    * 开始抚摸
    */
   startPetting(): void {
-    if (this.state !== PettingState.None) {
-      // 如果已经在抚摸中，重新开始计时
-      this.petStartTime = Date.now();
-      return;
-    }
+    if (this.state !== PettingState.None) return;
 
     this.state = PettingState.Petting;
     this.petStartTime = Date.now();
@@ -81,43 +67,10 @@ export class PettingController {
     const duration = Date.now() - this.petStartTime;
     const isValid = duration >= this.config.minDuration;
 
+    this.state = PettingState.None;
     this.callbacks.onPetEnd?.();
 
-    if (isValid) {
-      // 有效抚摸，进入开心状态
-      this.enterHappyState();
-    } else {
-      // 无效抚摸，直接回到无状态
-      this.state = PettingState.None;
-    }
-
     return isValid;
-  }
-
-  /**
-   * 更新状态
-   * @returns 如果状态发生变化返回 true
-   */
-  update(): boolean {
-    const now = Date.now();
-
-    if (this.state === PettingState.Petting) {
-      // 抚摸状态持续中，不需要自动转换
-      return false;
-    }
-
-    if (this.state === PettingState.Happy && now >= this.stateEndTime) {
-      this.enterCooldownState();
-      return true;
-    }
-
-    if (this.state === PettingState.Cooldown && now >= this.stateEndTime) {
-      console.log(`[PettingController] Cooldown ended at ${new Date().toLocaleTimeString()}, resuming None`);
-      this.state = PettingState.None;
-      return true;
-    }
-
-    return false;
   }
 
   /**
@@ -135,35 +88,11 @@ export class PettingController {
   }
 
   /**
-   * 是否处于冷却期
-   */
-  isInCooldown(): boolean {
-    return this.state === PettingState.Cooldown;
-  }
-
-  /**
-   * 获取冷却结束时间
-   */
-  getCooldownEndTime(): number {
-    if (this.state !== PettingState.Cooldown) return 0;
-    return this.stateEndTime;
-  }
-
-  /**
-   * 获取剩余冷却时间
-   */
-  getRemainingCooldown(): number {
-    if (this.state !== PettingState.Cooldown) return 0;
-    return Math.max(0, this.stateEndTime - Date.now());
-  }
-
-  /**
    * 重置到无状态
    */
   reset(): void {
     this.state = PettingState.None;
     this.petStartTime = 0;
-    this.stateEndTime = 0;
   }
 
   /**
@@ -171,25 +100,5 @@ export class PettingController {
    */
   updateConfig(config: Partial<PettingConfig>): void {
     this.config = { ...this.config, ...config };
-  }
-
-  /**
-   * 进入开心状态
-   */
-  private enterHappyState(): void {
-    this.state = PettingState.Happy;
-    this.stateEndTime = Date.now() + this.config.happyDuration;
-    this.callbacks.onHappyStart?.();
-  }
-
-  /**
-   * 进入冷却状态
-   */
-  private enterCooldownState(): void {
-    this.callbacks.onHappyEnd?.();
-    this.state = PettingState.Cooldown;
-    this.stateEndTime = Date.now() + this.config.cooldownDuration;
-    console.log(`[PettingController] Entered COOLDOWN at ${new Date().toLocaleTimeString()}, ends at ${new Date(this.stateEndTime).toLocaleTimeString()}, duration: ${this.config.cooldownDuration / 1000}s`);
-    this.callbacks.onCooldownStart?.();
   }
 }

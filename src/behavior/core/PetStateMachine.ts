@@ -5,7 +5,7 @@
 
 import { PetState } from '../../core/EventBus';
 import { StateConfig, DEFAULT_STATE_CONFIG } from './PetState';
-import { StateTransition, BehaviorConfig, DEFAULT_CONFIG } from './StateTransition';
+import { BehaviorConfig, DEFAULT_CONFIG } from './StateTransition';
 
 /**
  * 状态变更回调
@@ -25,16 +25,13 @@ export interface StateMachineConfig {
  */
 export class PetStateMachine {
   private currentState: PetState;
-  private stateStartTime: number;
-  private actionEndTime: number;  // 当前动作的结束时间
-  private transition: StateTransition;
+  private actionEndTime: number;
   private config: BehaviorConfig;
   private stateConfig: Map<PetState, StateConfig | null>;
 
   // 外部状态上下文
   private hasMouseTarget: boolean = false;
   private mouseDistance: number = Infinity;
-  private isBeingPetted: boolean = false;
   private inChaseCooldown: boolean = false;
 
   // 回调
@@ -42,10 +39,8 @@ export class PetStateMachine {
 
   constructor(config: Partial<BehaviorConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.transition = new StateTransition(this.config);
     this.stateConfig = new Map(Object.entries(DEFAULT_STATE_CONFIG) as [PetState, StateConfig | null][]);
     this.currentState = PetState.Idle;
-    this.stateStartTime = Date.now();
     this.actionEndTime = this.calculateActionEndTime(PetState.Idle);
   }
 
@@ -92,10 +87,10 @@ export class PetStateMachine {
   }
 
   /**
-   * 设置是否正在被抚摸
+   * 设置是否正在被抚摸（当前版本不需要存储此状态）
    */
-  setIsBeingPetted(isPetted: boolean): void {
-    this.isBeingPetted = isPetted;
+  setIsBeingPetted(_isPetted: boolean): void {
+    // no-op: 抚摸状态由 PettingController 管理，状态机只在 Petting 状态期间被强制切换
   }
 
   /**
@@ -192,7 +187,6 @@ export class PetStateMachine {
   private transitionTo(newState: PetState): void {
     const oldState = this.currentState;
     this.currentState = newState;
-    this.stateStartTime = Date.now();
 
     // 计算新状态的持续时间
     this.actionEndTime = this.calculateActionEndTime(newState);

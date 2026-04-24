@@ -110,8 +110,6 @@ export class PetBehavior {
       {
         petting: {
           minDuration: 500,
-          happyDuration: 1000,
-          cooldownDuration: this.config.chaseCooldown,
         },
         chasing: {
           triggerDistance: 150,
@@ -329,9 +327,12 @@ export class PetBehavior {
   /**
    * 强制进入追逐状态（测试用）
    */
-  forceChase(): void {
-    this.interaction.forceChase();
-    this.stateMachine.forceState(PetState.ChasingMouse);
+  forceChase(): boolean {
+    const success = this.interaction.forceChase();
+    if (success) {
+      this.stateMachine.forceState(PetState.ChasingMouse);
+    }
+    return success;
   }
 
   // ==================== 私有方法 ====================
