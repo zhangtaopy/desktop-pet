@@ -533,10 +533,7 @@ export class App {
         console.error('Failed to sync position:', e);
       }
 
-      const success = petBehavior.forceChase();
-      if (!success) {
-        console.log('[App] Cannot chase: pet is in cooldown after petting');
-      }
+      petBehavior.forceChase();
     }
 
     // 隐藏菜单
