@@ -112,6 +112,7 @@ export class PettingController {
     }
 
     if (this.state === PettingState.Cooldown && now >= this.stateEndTime) {
+      console.log(`[PettingController] Cooldown ended at ${new Date().toLocaleTimeString()}, resuming None`);
       this.state = PettingState.None;
       return true;
     }
@@ -188,6 +189,7 @@ export class PettingController {
     this.callbacks.onHappyEnd?.();
     this.state = PettingState.Cooldown;
     this.stateEndTime = Date.now() + this.config.cooldownDuration;
+    console.log(`[PettingController] Entered COOLDOWN at ${new Date().toLocaleTimeString()}, ends at ${new Date(this.stateEndTime).toLocaleTimeString()}, duration: ${this.config.cooldownDuration / 1000}s`);
     this.callbacks.onCooldownStart?.();
   }
 }

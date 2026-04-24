@@ -279,6 +279,9 @@ export class PetBehavior {
     const distance = chasingController.getDistanceToTarget();
     this.stateMachine.setHasMouseTarget(!!target, distance);
 
+    // 同步冷却状态给状态机（冷却期内不触发追逐）
+    this.stateMachine.setInChaseCooldown(this.interaction.isInCooldown());
+
     // 更新状态机
     this.stateMachine.update();
 

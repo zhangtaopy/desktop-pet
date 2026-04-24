@@ -5,7 +5,7 @@
 
 import { PetState } from '../../core/EventBus';
 import { StateConfig, DEFAULT_STATE_CONFIG } from './PetState';
-import { StateTransition, TransitionContext, BehaviorConfig, DEFAULT_CONFIG } from './StateTransition';
+import { StateTransition, BehaviorConfig, DEFAULT_CONFIG } from './StateTransition';
 
 /**
  * 状态变更回调
@@ -32,10 +32,10 @@ export class PetStateMachine {
   private stateConfig: Map<PetState, StateConfig | null>;
 
   // 外部状态上下文
-  private chaseCooldownEndTime: number = 0;
   private hasMouseTarget: boolean = false;
   private mouseDistance: number = Infinity;
   private isBeingPetted: boolean = false;
+  private inChaseCooldown: boolean = false;
 
   // 回调
   private onStateChange?: StateChangeCallback;
@@ -84,30 +84,6 @@ export class PetStateMachine {
   }
 
   /**
-   * 获取当前状态持续时间
-   */
-  getStateElapsedTime(): number {
-    return Date.now() - this.stateStartTime;
-  }
-
-  /**
-   * 获取当前状态的预计结束时间
-   */
-  getStateEndTime(): number | null {
-    const config = this.stateConfig.get(this.currentState);
-    if (!config) return null;
-    return this.stateStartTime + config.maxDuration;
-  }
-
-  /**
-   * 设置追逐冷却
-   * @param cooldownMs 冷却时间（毫秒）
-   */
-  setChaseCooldown(cooldownMs: number): void {
-    this.chaseCooldownEndTime = Date.now() + cooldownMs;
-  }
-
-  /**
    * 设置是否有鼠标目标
    */
   setHasMouseTarget(hasTarget: boolean, distance: number = Infinity): void {
@@ -120,6 +96,13 @@ export class PetStateMachine {
    */
   setIsBeingPetted(isPetted: boolean): void {
     this.isBeingPetted = isPetted;
+  }
+
+  /**
+   * 设置是否在追逐冷却期
+   */
+  setInChaseCooldown(inCooldown: boolean): void {
+    this.inChaseCooldown = inCooldown;
   }
 
   /**
@@ -157,13 +140,11 @@ export class PetStateMachine {
    */
   private decideNextState(): PetState {
     const random = Math.random();
-    const now = Date.now();
-    const inChaseCooldown = now < this.chaseCooldownEndTime;
 
     switch (this.currentState) {
       case PetState.Idle:
-        // 检查追逐
-        if (!inChaseCooldown && this.hasMouseTarget && random < this.config.chaseChance) {
+        // 检查追逐（冷却期内不触发）
+        if (this.hasMouseTarget && !this.inChaseCooldown && random < this.config.chaseChance) {
           return PetState.ChasingMouse;
         }
         // 检查睡觉
@@ -206,31 +187,6 @@ export class PetStateMachine {
   }
 
   /**
-   * 检查是否可以转换到目标状态
-   */
-  canTransitionTo(targetState: PetState): boolean {
-    const context = this.buildContext();
-    const nextState = this.transition.getNextState(context);
-    return nextState === targetState;
-  }
-
-  /**
-   * 构建转换上下文
-   */
-  private buildContext(): TransitionContext {
-    const now = Date.now();
-    return {
-      currentState: this.currentState,
-      elapsedTime: now - this.stateStartTime,
-      random: Math.random(),
-      inChaseCooldown: now < this.chaseCooldownEndTime,
-      hasMouseTarget: this.hasMouseTarget,
-      mouseDistance: this.mouseDistance,
-      isBeingPetted: this.isBeingPetted,
-    };
-  }
-
-  /**
    * 执行状态转换
    */
   private transitionTo(newState: PetState): void {
@@ -245,32 +201,5 @@ export class PetStateMachine {
     this.onStateChange?.(oldState, newState);
 
     console.log(`[PetStateMachine] ${oldState} -> ${newState}`);
-  }
-
-  /**
-   * 更新行为配置
-   */
-  updateConfig(config: Partial<BehaviorConfig>): void {
-    this.config = { ...this.config, ...config };
-    this.transition.updateConfig(this.config);
-  }
-
-  /**
-   * 获取状态配置
-   */
-  getStateConfig(state: PetState): StateConfig | null {
-    return this.stateConfig.get(state) ?? null;
-  }
-
-  /**
-   * 重置状态机到初始状态
-   */
-  reset(): void {
-    this.currentState = PetState.Idle;
-    this.stateStartTime = Date.now();
-    this.chaseCooldownEndTime = 0;
-    this.hasMouseTarget = false;
-    this.mouseDistance = Infinity;
-    this.isBeingPetted = false;
   }
 }

@@ -113,6 +113,7 @@ export class ChasingController {
     // 如果正在追逐，检查是否应该停止
     if (this.state === ChasingState.Chasing) {
       this.state = ChasingState.Cooldown;
+      console.log(`[ChasingController] Entered COOLDOWN (lost target) at ${new Date().toLocaleTimeString()}`);
     }
   }
 
@@ -125,6 +126,7 @@ export class ChasingController {
     // 如果正在追逐，立即停止
     if (this.state === ChasingState.Chasing || this.state === ChasingState.Tracking) {
       this.state = ChasingState.Cooldown;
+      console.log(`[ChasingController] Entered COOLDOWN (petted) at ${new Date().toLocaleTimeString()}, cooldown ends at ${new Date(this.lastPetTime + this.config.minCooldownAfterPet).toLocaleTimeString()}`);
       this.callbacks.onChaseEnded?.();
     }
   }
@@ -164,6 +166,7 @@ export class ChasingController {
     if (this.state === ChasingState.Chasing) return;
 
     this.state = ChasingState.Chasing;
+    console.log(`[ChasingController] Entered CHASING at ${new Date().toLocaleTimeString()}`);
     this.callbacks.onChaseStarted?.();
   }
 
@@ -173,6 +176,7 @@ export class ChasingController {
   stopChasing(): void {
     if (this.state === ChasingState.Chasing) {
       this.state = ChasingState.Cooldown;
+      console.log(`[ChasingController] Entered COOLDOWN (reached target) at ${new Date().toLocaleTimeString()}`);
       this.callbacks.onChaseEnded?.();
     }
   }
@@ -193,6 +197,7 @@ export class ChasingController {
     if (this.state === ChasingState.Cooldown) {
       const inCooldown = now - this.lastPetTime < this.config.minCooldownAfterPet;
       if (!inCooldown) {
+        console.log(`[ChasingController] Cooldown ended at ${new Date().toLocaleTimeString()}, resuming Idle`);
         this.state = ChasingState.Idle;
       }
     }
