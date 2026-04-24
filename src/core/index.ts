@@ -27,3 +27,9 @@ export type {
   StorageService,
   WindowManager,
 } from './AppContainer';
+
+export { PositionManager } from './PositionManager';
+export type { PositionManagerConfig } from './PositionManager';
+
+export { TaskScheduler } from './TaskScheduler';
+export type { TaskSchedulerConfig, TaskCallbacks } from './TaskScheduler';
