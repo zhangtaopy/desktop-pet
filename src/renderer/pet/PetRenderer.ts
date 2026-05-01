@@ -328,8 +328,8 @@ export class PetRenderer {
       this.ctx.restore();
 
       const bobPx = this.getBobY() * scale;
-      const eyeCenterX = x + displaySize * 14.5 / 32;
-      const eyeCenterY = y + displaySize * 13 / 32 + bobPx;
+      const eyeCenterX = x + displaySize * 16 / 32;
+      const eyeCenterY = y + displaySize * 14.5 / 32 + bobPx;
       this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
     } else {
       this.drawFallback();
