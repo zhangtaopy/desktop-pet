@@ -78,14 +78,15 @@ export class WeatherAccessory {
     cx: number, cy: number, ds: number
   ): void {
     const s = ds / 32;
+    const sy = cy + 5 * s;
     ctx.fillStyle = '#DD3333';
-    ctx.fillRect(cx - 6 * s, cy, 12 * s, 2 * s);
+    ctx.fillRect(cx - 6 * s, sy, 12 * s, 2 * s);
     ctx.fillStyle = '#33AA33';
-    ctx.fillRect(cx - 6 * s, cy, 12 * s, 1 * s);
+    ctx.fillRect(cx - 6 * s, sy, 12 * s, 1 * s);
     ctx.fillStyle = '#DD3333';
-    ctx.fillRect(cx + 4 * s, cy + 2 * s, 2 * s, 5 * s);
+    ctx.fillRect(cx + 4 * s, sy + 2 * s, 2 * s, 5 * s);
     ctx.fillStyle = '#33AA33';
-    ctx.fillRect(cx + 4 * s, cy + 4 * s, 2 * s, 1 * s);
+    ctx.fillRect(cx + 4 * s, sy + 4 * s, 2 * s, 1 * s);
   }
 
   private drawMist(
