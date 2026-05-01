@@ -6,6 +6,8 @@
 import { PetRenderer } from './renderer/pet/PetRenderer';
 import { PetBehavior } from './behavior/PetBehavior';
 import { TimeManager } from './renderer/TimeManager';
+import { WeatherService } from './renderer/WeatherService';
+import { DialogueManager } from './renderer/DialogueManager';
 import { eventBus } from './core/EventBus';
 import {
   container,
@@ -61,6 +63,13 @@ export class App {
   private taskScheduler!: TaskScheduler;
   private interactionManager!: InteractionManager;
   private menuManager!: MenuManager;
+  private weatherService!: WeatherService;
+  private dialogueManager!: DialogueManager;
+
+  // 天气同步
+  private readonly weatherFetchInterval = 30 * 60 * 1000;
+  private lastWeatherFetch: number = 0;
+  private weatherSynced: boolean = false;
 
   constructor(private config: AppConfig) {}
 
@@ -86,6 +95,10 @@ export class App {
       // 3. 初始化时间管理器
       const timeManager = new TimeManager();
       console.log('当前时间段:', timeManager.getTimeOfDay());
+
+      // 3.5 初始化天气服务和对话管理器
+      this.weatherService = new WeatherService();
+      this.dialogueManager = new DialogueManager(timeManager);
 
       // 4. 初始化渲染器
       const petRenderer = new PetRenderer({
@@ -164,7 +177,7 @@ export class App {
       this.interactionManager.setup();
 
       // 13. 初始化菜单
-      this.menuManager = new MenuManager(behavior, window, tauri, screenBounds);
+      this.menuManager = new MenuManager(petRenderer, this.dialogueManager);
       this.menuManager.setup();
 
       // 14. 设置事件监听
@@ -210,6 +223,15 @@ export class App {
       // 定期任务
       this.positionManager.tryPeriodicSave(now);
       this.taskScheduler.run(now);
+
+      // 天气同步
+      if (!this.weatherSynced || now - this.lastWeatherFetch > this.weatherFetchInterval) {
+        this.syncWeather();
+        this.lastWeatherFetch = now;
+      }
+
+      // 对话气泡
+      this.showRandomDialogue();
 
       requestAnimationFrame(mainLoop);
     };
@@ -357,6 +379,41 @@ export class App {
       petRenderer.setAnimation(animation);
       petRenderer.setFlipX(petBehavior.getWalkDirection() < 0);
     });
+  }
+
+  private showRandomDialogue(): void {
+    const { petRenderer } = this.services;
+    if (!petRenderer || !this.dialogueManager) return;
+
+    if (petRenderer.isBubbleVisible()) return;
+
+    const weather = this.weatherService.getCurrentWeather();
+    const dialogue = this.dialogueManager.getNextDialogue(weather);
+
+    if (dialogue) {
+      petRenderer.showBubble(dialogue);
+      eventBus.emit('dialogue:show', {
+        text: dialogue.text,
+        duration: dialogue.duration,
+      });
+    }
+  }
+
+  private async syncWeather(): Promise<void> {
+    const { petRenderer } = this.services;
+    if (!petRenderer) return;
+
+    const weather = await this.weatherService.getWeather();
+    if (weather) {
+      petRenderer.setWeather(weather.condition);
+      eventBus.emit('weather:updated', {
+        condition: weather.condition,
+        temperature: weather.temperature,
+        description: weather.description,
+      });
+    }
+
+    this.weatherSynced = true;
   }
 }
 

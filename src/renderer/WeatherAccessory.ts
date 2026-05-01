@@ -6,8 +6,7 @@ export class WeatherAccessory {
     condition: WeatherCondition,
     cx: number,
     cy: number,
-    displaySize: number,
-    flipX: boolean = false
+    displaySize: number
   ): void {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
