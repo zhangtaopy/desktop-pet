@@ -2,7 +2,6 @@ import { DialogueEntry } from './DialogueManager';
 
 const BUBBLE_PADDING_X = 8;
 const BUBBLE_PADDING_Y = 6;
-const BUBBLE_TAIL_H = 6;
 const FONT_SIZE = 10;
 const LINE_HEIGHT = 14;
 const CHAR_WIDTH = 7;
@@ -95,24 +94,6 @@ export class SpeechBubble {
     ctx.lineWidth = 1.5;
     this.drawRoundedRect(ctx, bx, by, this.bubbleWidth, this.bubbleHeight, CORNER_RADIUS);
     ctx.stroke();
-
-    // tail
-    const tailCenterX = bx + this.bubbleWidth / 2;
-    const tailY = by + this.bubbleHeight;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.strokeStyle = '#CCCCCC';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(tailCenterX - 4, tailY);
-    ctx.lineTo(tailCenterX, tailY + BUBBLE_TAIL_H);
-    ctx.lineTo(tailCenterX + 4, tailY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // cover tail seam
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(tailCenterX - 4, tailY - 1, 8, 2);
 
     // text
     ctx.fillStyle = '#222222';
