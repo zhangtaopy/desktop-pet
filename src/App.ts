@@ -485,15 +485,11 @@ export class App {
   }
 
   private setupMenu(): void {
-    const { petBehavior } = this.services;
-    if (!petBehavior) return;
+    const { petRenderer } = this.services;
+    if (!petRenderer) return;
 
     const menuBtn = document.getElementById('test-menu-btn');
     const menu = document.getElementById('test-menu');
-    const btnPet = document.getElementById('btn-pet');
-    const btnChase = document.getElementById('btn-chase');
-    const btnWalk = document.getElementById('btn-walk');
-    const btnSleep = document.getElementById('btn-sleep');
 
     const hideMenu = () => {
       if (this.menuVisible) {
@@ -508,22 +504,39 @@ export class App {
       menu?.classList.toggle('hidden', !this.menuVisible);
     });
 
-    btnPet?.addEventListener('click', () => {
-      petBehavior.startPetting();
+    // 天气测试按钮
+    document.getElementById('btn-weather-sunny')?.addEventListener('click', () => {
+      petRenderer.setWeather('sunny');
+      hideMenu();
+    });
+    document.getElementById('btn-weather-rain')?.addEventListener('click', () => {
+      petRenderer.setWeather('rain');
+      hideMenu();
+    });
+    document.getElementById('btn-weather-snow')?.addEventListener('click', () => {
+      petRenderer.setWeather('snow');
+      hideMenu();
+    });
+    document.getElementById('btn-weather-cloudy')?.addEventListener('click', () => {
+      petRenderer.setWeather('cloudy');
+      hideMenu();
+    });
+    document.getElementById('btn-weather-fog')?.addEventListener('click', () => {
+      petRenderer.setWeather('fog');
       hideMenu();
     });
 
-    btnChase?.addEventListener('click', () => {
-      this.triggerChase();
-    });
-
-    btnWalk?.addEventListener('click', () => {
-      petBehavior.forceWalk();
+    // 对话测试按钮
+    document.getElementById('btn-chat-time')?.addEventListener('click', () => {
+      petRenderer.showBubble(this.dialogueManager!.getInteractionDialogue());
       hideMenu();
     });
-
-    btnSleep?.addEventListener('click', () => {
-      petBehavior.forceSleep();
+    document.getElementById('btn-chat-weather')?.addEventListener('click', () => {
+      petRenderer.showBubble({ text: '☀️ 阳光真好！', duration: 3000, priority: 'weather' });
+      hideMenu();
+    });
+    document.getElementById('btn-chat-idle')?.addEventListener('click', () => {
+      petRenderer.showBubble({ text: '你好呀~', duration: 3000, priority: 'idle' });
       hideMenu();
     });
 
@@ -538,30 +551,6 @@ export class App {
 
     // 监听托盘事件
     this.listenTrayEvents(menuBtn);
-  }
-
-  private async triggerChase(): Promise<void> {
-    const { petBehavior, window } = this.services;
-    if (!petBehavior) return;
-
-    const hasTarget = await this.updateMousePosition();
-    if (hasTarget && window) {
-      try {
-        const pos = await window.outerPosition();
-        petBehavior.setPosition(pos.x, pos.y);
-      } catch (e) {
-        console.error('Failed to sync position:', e);
-      }
-
-      petBehavior.forceChase();
-    }
-
-    // 隐藏菜单
-    const menu = document.getElementById('test-menu');
-    if (this.menuVisible) {
-      this.menuVisible = false;
-      menu?.classList.add('hidden');
-    }
   }
 
   private async updateMousePosition(): Promise<boolean> {

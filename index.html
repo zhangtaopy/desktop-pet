@@ -9,13 +9,19 @@
     <div id="app">
       <canvas id="pet-canvas"></canvas>
       <!-- 测试菜单按钮 -->
-      <div id="test-menu-btn" class="hidden" title="测试菜单">⚙️</div>
+      <div id="test-menu-btn" title="测试菜单">⚙️</div>
       <!-- 测试菜单面板 -->
       <div id="test-menu" class="hidden">
-        <button id="btn-pet">🤲 抚摸宠物</button>
-        <button id="btn-chase">🏃 追逐鼠标</button>
-        <button id="btn-walk">🚶 开始行走</button>
-        <button id="btn-sleep">😴 开始睡觉</button>
+        <div style="font-size:10px;color:#666;margin-bottom:2px;">--- 天气测试 ---</div>
+        <button id="btn-weather-sunny">🕶️ 晴天</button>
+        <button id="btn-weather-rain">🌂 下雨</button>
+        <button id="btn-weather-snow">🧣 下雪</button>
+        <button id="btn-weather-cloudy">☁️ 多云</button>
+        <button id="btn-weather-fog">🌫️ 起雾</button>
+        <div style="font-size:10px;color:#666;margin-bottom:2px;margin-top:4px;">--- 对话测试 ---</div>
+        <button id="btn-chat-time">💬 时间问候</button>
+        <button id="btn-chat-weather">💬 天气吐槽</button>
+        <button id="btn-chat-idle">💬 随机闲话</button>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
