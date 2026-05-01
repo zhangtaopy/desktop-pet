@@ -60,7 +60,7 @@ export class WeatherAccessory {
     cx: number, cy: number, ds: number
   ): void {
     const s = ds / 32;
-    const ux = cx;
+    const ux = cx + 5 * s;
     const uy = cy - 14 * s;
     // arched dome canopy (bulges at middle, curves in at bottom)
     ctx.fillStyle = '#5599EE';
