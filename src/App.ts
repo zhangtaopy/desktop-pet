@@ -177,7 +177,7 @@ export class App {
       this.interactionManager.setup();
 
       // 13. 初始化菜单
-      this.menuManager = new MenuManager(petRenderer, this.dialogueManager);
+      this.menuManager = new MenuManager(petRenderer, this.dialogueManager, this.weatherService);
       this.menuManager.setup();
 
       // 14. 设置事件监听

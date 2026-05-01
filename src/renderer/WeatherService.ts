@@ -41,8 +41,11 @@ export class WeatherService {
   private lastFetchTime: number = 0;
   private fetchInterval: number = 30 * 60 * 1000;
   private cacheKey: string = 'desktop-pet-weather';
+  private locationKey: string = 'desktop-pet-weather-location';
+  private location: string;
 
   constructor() {
+    this.location = localStorage.getItem(this.locationKey) || '';
     this.loadFromCache();
   }
 
@@ -77,7 +80,10 @@ export class WeatherService {
     }
 
     try {
-      const response = await fetch('https://wttr.in/?format=j1', {
+      const url = this.location
+        ? `https://wttr.in/${encodeURIComponent(this.location)}?format=j1`
+        : 'https://wttr.in/?format=j1';
+      const response = await fetch(url, {
         signal: AbortSignal.timeout(10000),
       });
 
@@ -110,5 +116,20 @@ export class WeatherService {
 
   getCurrentWeather(): WeatherData | null {
     return this.currentWeather;
+  }
+
+  setLocation(location: string): void {
+    this.location = location;
+    if (location) {
+      localStorage.setItem(this.locationKey, location);
+    } else {
+      localStorage.removeItem(this.locationKey);
+    }
+    this.currentWeather = null;
+    this.lastFetchTime = 0;
+  }
+
+  getLocation(): string {
+    return this.location;
   }
 }

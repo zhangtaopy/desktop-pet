@@ -1,5 +1,6 @@
 import { PetRenderer } from '../renderer/pet/PetRenderer';
 import { DialogueManager } from '../renderer/DialogueManager';
+import { WeatherService } from '../renderer/WeatherService';
 
 export class MenuManager {
   private menuVisible: boolean = false;
@@ -8,6 +9,7 @@ export class MenuManager {
   constructor(
     private petRenderer: PetRenderer,
     private dialogueManager: DialogueManager,
+    private weatherService: WeatherService,
   ) {}
 
   setup(): void {
@@ -50,6 +52,25 @@ export class MenuManager {
     });
     this.bindButton('btn-chat-idle', () => {
       this.petRenderer.showBubble({ text: '你好呀~', duration: 3000, priority: 'idle' });
+      hideMenu();
+    });
+
+    // 地点设置
+    const locationInput = document.getElementById('input-location') as HTMLInputElement;
+    if (locationInput) {
+      locationInput.value = this.weatherService.getLocation();
+    }
+    this.bindButton('btn-set-location', () => {
+      if (locationInput) {
+        this.weatherService.setLocation(locationInput.value.trim());
+        this.petRenderer.showBubble({
+          text: locationInput.value.trim()
+            ? `已切换到 ${locationInput.value.trim()} 的天气`
+            : '已切换为自动定位',
+          duration: 2500,
+          priority: 'interaction',
+        });
+      }
       hideMenu();
     });
 
