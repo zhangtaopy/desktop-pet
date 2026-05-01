@@ -60,17 +60,18 @@ export class WeatherAccessory {
     cx: number, cy: number, ds: number
   ): void {
     const s = ds / 32;
-    const ux = cx + 4 * s;
+    const ux = cx;
     const uy = cy - 14 * s;
-    // canopy (dome shape, wider at bottom)
+    // arched dome canopy (bulges at middle, curves in at bottom)
     ctx.fillStyle = '#5599EE';
     ctx.fillRect(ux - 1 * s, uy, 3 * s, 1 * s);
     ctx.fillRect(ux - 3 * s, uy + 1 * s, 7 * s, 1 * s);
-    ctx.fillRect(ux - 4 * s, uy + 2 * s, 9 * s, 1 * s);
-    ctx.fillRect(ux - 5 * s, uy + 3 * s, 11 * s, 2 * s);
+    ctx.fillRect(ux - 5 * s, uy + 2 * s, 11 * s, 2 * s);
+    ctx.fillRect(ux - 4 * s, uy + 4 * s, 9 * s, 1 * s);
+    ctx.fillRect(ux - 3 * s, uy + 5 * s, 7 * s, 1 * s);
     // handle
     ctx.fillStyle = '#8B4513';
-    ctx.fillRect(ux, uy + 5 * s, 1 * s, 8 * s);
+    ctx.fillRect(ux, uy + 6 * s, 1 * s, 7 * s);
     ctx.fillRect(ux - 2 * s, uy + 13 * s, 5 * s, 1 * s);
   }
 
