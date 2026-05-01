@@ -4,9 +4,8 @@ const BUBBLE_PADDING_X = 8;
 const BUBBLE_PADDING_Y = 6;
 const FONT_SIZE = 10;
 const LINE_HEIGHT = 14;
-const CHAR_WIDTH = 7;
-const MAX_CHARS_PER_LINE = 14;
 const CORNER_RADIUS = 4;
+const CANVAS_WIDTH = 128;
 
 export class SpeechBubble {
   private visible: boolean = false;
@@ -26,8 +25,7 @@ export class SpeechBubble {
     this.opacity = 0;
     this.fadePhase = 'in';
     this.fadeTimer = 0;
-    this.lines = this.wrapText(dialogue.text);
-    this.calcBubbleSize();
+    this.prepareText(dialogue.text);
   }
 
   hide(): void {
@@ -70,26 +68,30 @@ export class SpeechBubble {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D, canvasWidth: number): void {
+  render(ctx: CanvasRenderingContext2D): void {
     if (!this.visible || this.opacity <= 0) return;
 
     ctx.save();
     ctx.globalAlpha = this.opacity;
     ctx.imageSmoothingEnabled = false;
 
-    const bx = Math.max(2, Math.floor((canvasWidth - this.bubbleWidth) / 2));
+    const bx = Math.max(2, Math.floor((CANVAS_WIDTH - this.bubbleWidth) / 2));
     const by = 2;
 
-    // bubble shadow
+    ctx.beginPath();
+    ctx.rect(0, 0, CANVAS_WIDTH, CANVAS_WIDTH);
+    ctx.clip();
+
+    // shadow
     ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
     this.drawRoundedRect(ctx, bx + 1, by + 1, this.bubbleWidth, this.bubbleHeight, CORNER_RADIUS);
 
-    // bubble body
+    // body
     ctx.fillStyle = '#FFFFFF';
     this.drawRoundedRect(ctx, bx, by, this.bubbleWidth, this.bubbleHeight, CORNER_RADIUS);
     ctx.fill();
 
-    // bubble border
+    // border
     ctx.strokeStyle = '#CCCCCC';
     ctx.lineWidth = 1.5;
     this.drawRoundedRect(ctx, bx, by, this.bubbleWidth, this.bubbleHeight, CORNER_RADIUS);
@@ -114,38 +116,50 @@ export class SpeechBubble {
     return this.visible && this.fadePhase !== 'done';
   }
 
-  private wrapText(text: string): string[] {
+  private prepareText(text: string): void {
+    const measureCanvas = document.createElement('canvas');
+    const mctx = measureCanvas.getContext('2d')!;
+    mctx.font = `bold ${FONT_SIZE}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+
+    const maxWidth = CANVAS_WIDTH - BUBBLE_PADDING_X * 2 - 4;
+
     const lines: string[] = [];
     let remaining = text;
 
     while (remaining.length > 0) {
-      if (remaining.length <= MAX_CHARS_PER_LINE) {
+      if (mctx.measureText(remaining).width <= maxWidth) {
         lines.push(remaining);
         break;
       }
 
-      let cutIndex = MAX_CHARS_PER_LINE;
-      for (let i = MAX_CHARS_PER_LINE - 1; i >= MAX_CHARS_PER_LINE - 3; i--) {
-        if (i > 0 && /[\s。，,、?!！？～~]/.test(remaining[i])) {
-          cutIndex = i + 1;
-          break;
+      let lo = 1;
+      let hi = remaining.length;
+
+      while (lo < hi) {
+        const mid = Math.ceil((lo + hi) / 2);
+        if (mctx.measureText(remaining.substring(0, mid)).width <= maxWidth) {
+          lo = mid;
+        } else {
+          hi = mid - 1;
         }
       }
 
-      lines.push(remaining.substring(0, cutIndex).trim());
-      remaining = remaining.substring(cutIndex).trim();
+      lines.push(remaining.substring(0, lo).trim());
+      remaining = remaining.substring(lo).trim();
     }
 
-    return lines;
-  }
+    this.lines = lines;
 
-  private calcBubbleSize(): void {
-    const maxLineLen = Math.max(...this.lines.map(l => l.length), 1);
+    let maxLineW = 0;
+    for (const line of lines) {
+      maxLineW = Math.max(maxLineW, mctx.measureText(line).width);
+    }
+
     this.bubbleWidth = Math.min(
-      maxLineLen * CHAR_WIDTH + BUBBLE_PADDING_X * 2 + 4,
-      122
+      Math.ceil(maxLineW + BUBBLE_PADDING_X * 2 + 4),
+      CANVAS_WIDTH - 4
     );
-    this.bubbleHeight = this.lines.length * LINE_HEIGHT + BUBBLE_PADDING_Y * 2;
+    this.bubbleHeight = lines.length * LINE_HEIGHT + BUBBLE_PADDING_Y * 2;
   }
 
   private drawRoundedRect(

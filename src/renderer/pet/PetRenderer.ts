@@ -335,7 +335,7 @@ export class PetRenderer {
       this.drawFallback();
     }
 
-    this.bubble.render(this.ctx, this.canvas.width);
+    this.bubble.render(this.ctx);
   }
 
   /**
