@@ -183,11 +183,10 @@ class ServiceContainer {
    * 获取服务
    */
   get<K extends keyof AppServices>(key: K): AppServices[K] {
-    const service = this.services[key];
-    if (!service) {
+    if (!(key in this.services)) {
       throw new Error(`Service '${String(key)}' not registered`);
     }
-    return service;
+    return this.services[key] as AppServices[K];
   }
 
   /**

@@ -6,7 +6,8 @@ export class WeatherAccessory {
     condition: WeatherCondition,
     cx: number,
     cy: number,
-    displaySize: number
+    displaySize: number,
+    flipX: boolean = false
   ): void {
     ctx.save();
     ctx.imageSmoothingEnabled = false;
@@ -47,12 +48,12 @@ export class WeatherAccessory {
   ): void {
     const s = ds / 32;
     ctx.fillStyle = '#222222';
-    ctx.fillRect(cx - 7 * s, cy - 1 * s, 5 * s, 2 * s);
-    ctx.fillRect(cx + 2 * s, cy - 1 * s, 5 * s, 2 * s);
-    ctx.fillRect(cx - 2 * s, cy - 1 * s, 4 * s, 2 * s);
+    ctx.fillRect(cx - 11 * s, cy - 0.5 * s, 8 * s, 2 * s);
+    ctx.fillRect(cx + 3 * s, cy - 0.5 * s, 8 * s, 2 * s);
+    ctx.fillRect(cx - 1 * s, cy - 0.5 * s, 2 * s, 2 * s);
     ctx.fillStyle = '#1a1a2eba';
-    ctx.fillRect(cx - 6 * s, cy + 0 * s, 3 * s, 2 * s);
-    ctx.fillRect(cx + 3 * s, cy + 0 * s, 3 * s, 2 * s);
+    ctx.fillRect(cx - 10 * s, cy + 0.5 * s, 6 * s, 2 * s);
+    ctx.fillRect(cx + 4 * s, cy + 0.5 * s, 6 * s, 2 * s);
   }
 
   private drawUmbrella(
