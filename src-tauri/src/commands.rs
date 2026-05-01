@@ -30,14 +30,6 @@ pub fn get_mouse_position() -> Result<MousePosition, String> {
     {
         use core_graphics::event::CGEvent;
         use core_graphics::event_source::CGEventSource;
-        use core_graphics::display::{CGDisplay, CGMainDisplayID};
-
-        // 打印显示器信息
-        unsafe {
-            let display = CGDisplay::new(CGMainDisplayID());
-            let width = display.pixels_wide();
-            let height = display.pixels_high();
-        }
 
         let source = CGEventSource::new(core_graphics::event_source::CGEventSourceStateID::CombinedSessionState)
             .map_err(|e| format!("Failed to create event source: {:?}", e))?;

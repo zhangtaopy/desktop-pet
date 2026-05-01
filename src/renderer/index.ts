@@ -35,3 +35,17 @@ export type {
 
 // 时间管理器
 export { TimeManager } from './TimeManager';
+
+// 天气服务
+export { WeatherService } from './WeatherService';
+export type { WeatherData, WeatherCondition } from './WeatherService';
+
+// 对话管理器
+export { DialogueManager } from './DialogueManager';
+export type { DialogueEntry } from './DialogueManager';
+
+// 对话气泡
+export { SpeechBubble } from './SpeechBubble';
+
+// 天气饰品
+export { WeatherAccessory } from './WeatherAccessory';

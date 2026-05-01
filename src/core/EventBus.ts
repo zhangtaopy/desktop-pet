@@ -36,6 +36,23 @@ export enum PetAnimation {
 }
 
 /**
+ * 天气事件数据
+ */
+export interface WeatherEventData {
+  condition: string;
+  temperature: number;
+  description: string;
+}
+
+/**
+ * 对话气泡事件数据
+ */
+export interface DialogueEventData {
+  text: string;
+  duration: number;
+}
+
+/**
  * 事件定义接口
  */
 export interface PetEvents {
@@ -57,6 +74,14 @@ export interface PetEvents {
   'user:mouseMoved': Position;
   'user:dragStart': void;
   'user:dragEnd': Position;
+
+  // 天气事件
+  'weather:updated': WeatherEventData;
+  'weather:error': string;
+
+  // 对话/气泡事件
+  'dialogue:show': DialogueEventData;
+  'dialogue:hide': void;
 
   // 系统事件
   'app:initialized': void;

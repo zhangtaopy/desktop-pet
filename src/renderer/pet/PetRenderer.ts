@@ -7,6 +7,10 @@ import { SpriteRenderer, SpriteRendererConfig } from '../sprite';
 import { PetAnimation } from '../../core/EventBus';
 import { PetAppearance, DEFAULT_PET_COLORS } from './PetAppearance';
 import { PetExpression } from './PetExpression';
+import { SpeechBubble } from '../SpeechBubble';
+import { DialogueEntry } from '../DialogueManager';
+import { WeatherAccessory } from '../WeatherAccessory';
+import { WeatherCondition } from '../WeatherService';
 
 /**
  * 动画配置映射
@@ -81,6 +85,10 @@ export class PetRenderer {
   private currentAnimation: PetAnimation = PetAnimation.Idle;
   private lastTime: number = 0;
   private flipX: boolean = false;
+  private currentFrame: number = 0;
+  private bubble: SpeechBubble = new SpeechBubble();
+  private weatherAccessory: WeatherAccessory = new WeatherAccessory();
+  private weatherCondition: WeatherCondition = 'unknown';
 
   constructor(config: PetRendererConfig) {
     this.canvas = config.canvas;
@@ -243,8 +251,22 @@ export class PetRenderer {
   }
 
   /**
-   * 设置当前动画
+   * 获取当前帧的垂直跳动偏移
    */
+  getBobY(): number {
+    const frame = this.currentFrame;
+    if (this.currentAnimation === PetAnimation.Walk) {
+      return frame % 2 === 0 ? -1 : 0;
+    } else if (this.currentAnimation === PetAnimation.Run) {
+      return frame % 2 === 0 ? -3 : 0;
+    } else if (this.currentAnimation === PetAnimation.Idle) {
+      return frame === 1 || frame === 3 ? 1 : 0;
+    } else if (this.currentAnimation === PetAnimation.Petting ||
+               this.currentAnimation === PetAnimation.Happy) {
+      return frame % 2 === 0 ? -2 : 0;
+    }
+    return 0;
+  }
   setAnimation(animation: PetAnimation): void {
     if (this.currentAnimation !== animation) {
       this.currentAnimation = animation;
@@ -269,7 +291,10 @@ export class PetRenderer {
     const sprite = this.sprites.get(this.currentAnimation);
     if (sprite?.loaded()) {
       sprite.update(deltaTime);
+      this.currentFrame = sprite.getCurrentFrame();
     }
+
+    this.bubble.update(deltaTime);
   }
 
   /**
@@ -301,9 +326,16 @@ export class PetRenderer {
       );
 
       this.ctx.restore();
+
+      const bobPx = this.getBobY() * scale;
+      const eyeCenterX = x + displaySize * 16 / 32;
+      const eyeCenterY = y + displaySize * 14.5 / 32 + bobPx;
+      this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
     } else {
       this.drawFallback();
     }
+
+    this.bubble.render(this.ctx, this.canvas.width);
   }
 
   /**
@@ -356,6 +388,34 @@ export class PetRenderer {
    */
   getFlipX(): boolean {
     return this.flipX;
+  }
+
+  /**
+   * 显示对话气泡
+   */
+  showBubble(dialogue: DialogueEntry): void {
+    this.bubble.show(dialogue);
+  }
+
+  /**
+   * 隐藏对话气泡
+   */
+  hideBubble(): void {
+    this.bubble.hide();
+  }
+
+  /**
+   * 获取气泡是否可见
+   */
+  isBubbleVisible(): boolean {
+    return this.bubble.isVisible();
+  }
+
+  /**
+   * 设置天气状态
+   */
+  setWeather(condition: WeatherCondition): void {
+    this.weatherCondition = condition;
   }
 }
 

@@ -6,6 +6,8 @@
 import { PetRenderer } from './renderer/pet/PetRenderer';
 import { PetBehavior } from './behavior/PetBehavior';
 import { TimeManager } from './renderer/TimeManager';
+import { WeatherService } from './renderer/WeatherService';
+import { DialogueManager } from './renderer/DialogueManager';
 import { eventBus } from './core/EventBus';
 import { initDrag } from './drag';
 import {
@@ -57,11 +59,16 @@ export class App {
   private lastMouseUpdate: number = 0;
   private isDragging: boolean = false;
   private menuVisible: boolean = false;
+  private weatherService: WeatherService | null = null;
+  private dialogueManager: DialogueManager | null = null;
 
   // 配置常量
   private readonly saveInterval = 5000;
   private readonly timeCheckInterval = 60000;
   private readonly mouseUpdateInterval = 100;
+  private readonly weatherFetchInterval = 30 * 60 * 1000;
+  private lastWeatherFetch: number = 0;
+  private weatherSynced: boolean = false;
 
   constructor(private config: AppConfig) {}
 
@@ -87,6 +94,10 @@ export class App {
       // 3. 初始化时间管理器
       const timeManager = new TimeManager();
       console.log('当前时间段:', timeManager.getTimeOfDay());
+
+      // 3.5 初始化天气服务和对话管理器
+      this.weatherService = new WeatherService();
+      this.dialogueManager = new DialogueManager(timeManager);
 
       // 4. 初始化渲染器
       const petRenderer = new PetRenderer({
@@ -226,6 +237,15 @@ export class App {
       this.updateMousePosition();
       this.lastMouseUpdate = now;
     }
+
+    // 获取天气（首次立即获取，之后按间隔）
+    if (!this.weatherSynced || now - this.lastWeatherFetch > this.weatherFetchInterval) {
+      this.syncWeather();
+      this.lastWeatherFetch = now;
+    }
+
+    // 对话气泡
+    this.showRandomDialogue();
   }
 
   /**
@@ -584,6 +604,41 @@ export class App {
     } catch {
       // Ignore
     }
+  }
+
+  private showRandomDialogue(): void {
+    const { petRenderer } = this.services;
+    if (!petRenderer || !this.dialogueManager) return;
+
+    if (petRenderer.isBubbleVisible()) return;
+
+    const weather = this.weatherService?.getCurrentWeather() ?? null;
+    const dialogue = this.dialogueManager.getNextDialogue(weather);
+
+    if (dialogue) {
+      petRenderer.showBubble(dialogue);
+      eventBus.emit('dialogue:show', {
+        text: dialogue.text,
+        duration: dialogue.duration,
+      });
+    }
+  }
+
+  private async syncWeather(): Promise<void> {
+    const { petRenderer } = this.services;
+    if (!this.weatherService || !petRenderer) return;
+
+    const weather = await this.weatherService.getWeather();
+    if (weather) {
+      petRenderer.setWeather(weather.condition);
+      eventBus.emit('weather:updated', {
+        condition: weather.condition,
+        temperature: weather.temperature,
+        description: weather.description,
+      });
+    }
+
+    this.weatherSynced = true;
   }
 
   private async listenTrayEvents(menuBtn: HTMLElement | null): Promise<void> {

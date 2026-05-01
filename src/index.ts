@@ -42,6 +42,10 @@ export {
   PetAppearance,
   PetExpression,
   TimeManager,
+  WeatherService,
+  DialogueManager,
+  SpeechBubble,
+  WeatherAccessory,
   DEFAULT_PET_COLORS,
 } from './renderer';
 
@@ -55,4 +59,7 @@ export type {
   PixelColor,
   PetAppearanceConfig,
   ExpressionState,
+  WeatherData,
+  WeatherCondition,
+  DialogueEntry,
 } from './renderer';
