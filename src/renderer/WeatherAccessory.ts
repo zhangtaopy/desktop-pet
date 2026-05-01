@@ -94,10 +94,12 @@ export class WeatherAccessory {
     cx: number, cy: number, ds: number
   ): void {
     const s = ds / 32;
-    ctx.fillStyle = 'rgba(200, 200, 220, 0.3)';
-    ctx.fillRect(cx - 8 * s, cy - 5 * s, 6 * s, 1 * s);
-    ctx.fillRect(cx - 3 * s, cy - 7 * s, 8 * s, 1 * s);
-    ctx.fillRect(cx + 2 * s, cy - 4 * s, 6 * s, 1 * s);
+    // fog hovering above the head
+    ctx.fillStyle = 'rgba(210, 210, 225, 0.55)';
+    ctx.fillRect(cx - 9 * s, cy - 10 * s, 6 * s, 3 * s);
+    ctx.fillRect(cx - 5 * s, cy - 12 * s, 12 * s, 2 * s);
+    ctx.fillRect(cx + 3 * s, cy - 11 * s, 8 * s, 3 * s);
+    ctx.fillRect(cx + 7 * s, cy - 9 * s, 5 * s, 3 * s);
   }
 
   private drawCloud(
