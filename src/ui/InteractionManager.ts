@@ -64,30 +64,28 @@ export class InteractionManager {
   }
 
   private setupClickPetting(): void {
-    let lastClickTime = 0;
+    let clickCount = 0;
+    let clickTimer: ReturnType<typeof setTimeout> | null = null;
+    const DOUBLE_CLICK_THRESHOLD = 350;
 
     const onMouseUp = () => {
       if (this.isDragging) return;
-      const now = Date.now();
-      if (now - lastClickTime < 300) return;
-      lastClickTime = now;
 
-      if (this.pomodoroTimer?.isRunning()) {
-        this.petRenderer?.showBubble({
-          text: `还剩 ${Math.ceil(this.pomodoroTimer.getRemainingMs() / 60000)} 分钟`,
-          duration: 2000,
-          priority: 'interaction',
-        });
-        return;
+      clickCount++;
+
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          this.handleSingleClick();
+          clickCount = 0;
+        }, DOUBLE_CLICK_THRESHOLD);
+      } else if (clickCount >= 2) {
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+        }
+        this.handleDoubleClick();
+        clickCount = 0;
       }
-
-      this.behavior.startPetting();
-
-      if (this.pettingTimer) clearTimeout(this.pettingTimer);
-      this.pettingTimer = setTimeout(() => {
-        this.behavior.stopPetting();
-        this.pettingTimer = null;
-      }, PETTING_DURATION);
     };
 
     const onMouseLeave = () => {
@@ -101,5 +99,37 @@ export class InteractionManager {
       () => this.canvas.removeEventListener('mouseup', onMouseUp),
       () => this.canvas.removeEventListener('mouseleave', onMouseLeave),
     );
+  }
+
+  private handleSingleClick(): void {
+    if (this.pomodoroTimer?.isRunning()) {
+      this.petRenderer?.showBubble({
+        text: `还剩 ${Math.ceil(this.pomodoroTimer.getRemainingMs() / 60000)} 分钟`,
+        duration: 2000,
+        priority: 'interaction',
+      });
+      return;
+    }
+
+    this.behavior.startPetting();
+
+    if (this.pettingTimer) clearTimeout(this.pettingTimer);
+    this.pettingTimer = setTimeout(() => {
+      this.behavior.stopPetting();
+      this.pettingTimer = null;
+    }, PETTING_DURATION);
+  }
+
+  private handleDoubleClick(): void {
+    if (this.pomodoroTimer?.isRunning()) {
+      this.pomodoroTimer.stop();
+      this.petRenderer?.showBubble({
+        text: '番茄钟已停止',
+        duration: 2000,
+        priority: 'interaction',
+      });
+    } else {
+      this.pomodoroTimer?.startOrRestart();
+    }
   }
 }
