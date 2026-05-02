@@ -21,7 +21,7 @@ export class FocusAccessory {
     const diameter = 13 * s;
     const radius = diameter / 2;
     const centerX = cx;
-    const centerY = cy - 10 * s;
+    const centerY = cy - 20 * s;
 
     // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
