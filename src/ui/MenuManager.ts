@@ -87,12 +87,6 @@ export class MenuManager {
       hideMenu();
     });
 
-    this.bindButton('btn-pomodoro-stop', () => {
-      this.pomodoroTimer.stop();
-      this.petRenderer.showBubble({ text: '番茄钟已停止', duration: 2000, priority: 'interaction' });
-      hideMenu();
-    });
-
     const onOutsideClick = (e: MouseEvent) => {
       if (!this.menuVisible) return;
       const target = e.target as HTMLElement;
