@@ -1,6 +1,7 @@
 import { PetRenderer } from '../renderer/pet/PetRenderer';
 import { DialogueManager } from '../renderer/DialogueManager';
 import { WeatherService } from '../renderer/WeatherService';
+import { PomodoroTimer } from '../renderer/PomodoroTimer';
 
 export class MenuManager {
   private menuVisible: boolean = false;
@@ -10,6 +11,7 @@ export class MenuManager {
     private petRenderer: PetRenderer,
     private dialogueManager: DialogueManager,
     private weatherService: WeatherService,
+    private pomodoroTimer: PomodoroTimer,
   ) {}
 
   setup(): void {
@@ -71,6 +73,23 @@ export class MenuManager {
           priority: 'interaction',
         });
       }
+      hideMenu();
+    });
+
+    // 番茄钟
+    this.bindButton('btn-pomodoro-start', () => {
+      if (this.pomodoroTimer.isRunning()) {
+        this.pomodoroTimer.stop();
+        this.petRenderer.showBubble({ text: '番茄钟已停止', duration: 2000, priority: 'interaction' });
+      } else {
+        this.pomodoroTimer.startOrRestart();
+      }
+      hideMenu();
+    });
+
+    this.bindButton('btn-pomodoro-stop', () => {
+      this.pomodoroTimer.stop();
+      this.petRenderer.showBubble({ text: '番茄钟已停止', duration: 2000, priority: 'interaction' });
       hideMenu();
     });
 

@@ -8,6 +8,7 @@ import { PetBehavior } from './behavior/PetBehavior';
 import { TimeManager } from './renderer/TimeManager';
 import { WeatherService } from './renderer/WeatherService';
 import { DialogueManager } from './renderer/DialogueManager';
+import { PomodoroTimer } from './renderer/PomodoroTimer';
 import { eventBus } from './core/EventBus';
 import {
   container,
@@ -65,6 +66,7 @@ export class App {
   private menuManager!: MenuManager;
   private weatherService!: WeatherService;
   private dialogueManager!: DialogueManager;
+  private pomodoroTimer!: PomodoroTimer;
 
   // 天气同步
   private readonly weatherFetchInterval = 30 * 60 * 1000;
@@ -99,6 +101,20 @@ export class App {
       // 3.5 初始化天气服务和对话管理器
       this.weatherService = new WeatherService();
       this.dialogueManager = new DialogueManager(timeManager);
+
+      // 3.6 初始化番茄钟
+      this.pomodoroTimer = new PomodoroTimer();
+      this.pomodoroTimer.setTickHandler((phase, remainingMs, totalMs) => {
+        petRenderer.setPomodoroState(phase);
+        if (phase === 'focus' && remainingMs === totalMs) {
+          const mins = Math.ceil(totalMs / 60000);
+          petRenderer.showBubble({ text: `专注开始！${mins} 分钟`, duration: 3000, priority: 'interaction' });
+        } else if (phase === 'shortBreak' && remainingMs === totalMs) {
+          petRenderer.showBubble({ text: '休息一下~ 5 分钟', duration: 3000, priority: 'interaction' });
+        } else if (phase === 'longBreak' && remainingMs === totalMs) {
+          petRenderer.showBubble({ text: '完成4轮！长休息15分钟', duration: 4000, priority: 'interaction' });
+        }
+      });
 
       // 4. 初始化渲染器
       const petRenderer = new PetRenderer({
@@ -177,7 +193,7 @@ export class App {
       this.interactionManager.setup();
 
       // 13. 初始化菜单
-      this.menuManager = new MenuManager(petRenderer, this.dialogueManager, this.weatherService);
+      this.menuManager = new MenuManager(petRenderer, this.dialogueManager, this.weatherService, this.pomodoroTimer);
       this.menuManager.setup();
 
       // 14. 设置事件监听
@@ -232,6 +248,9 @@ export class App {
 
       // 对话气泡
       this.showRandomDialogue();
+
+      // 番茄钟
+      this.pomodoroTimer.update(timestamp);
 
       requestAnimationFrame(mainLoop);
     };

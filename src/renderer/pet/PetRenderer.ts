@@ -11,6 +11,8 @@ import { SpeechBubble } from '../SpeechBubble';
 import { DialogueEntry } from '../DialogueManager';
 import { WeatherAccessory } from '../WeatherAccessory';
 import { WeatherCondition } from '../WeatherService';
+import { FocusAccessory } from '../FocusAccessory';
+import { PomodoroPhase } from '../PomodoroTimer';
 
 /**
  * 动画配置映射
@@ -88,7 +90,9 @@ export class PetRenderer {
   private currentFrame: number = 0;
   private bubble: SpeechBubble = new SpeechBubble();
   private weatherAccessory: WeatherAccessory = new WeatherAccessory();
+  private focusAccessory: FocusAccessory = new FocusAccessory();
   private weatherCondition: WeatherCondition = 'unknown';
+  private pomodoroPhase: PomodoroPhase = 'idle';
 
   constructor(config: PetRendererConfig) {
     this.canvas = config.canvas;
@@ -331,6 +335,7 @@ export class PetRenderer {
       const eyeCenterX = x + displaySize * 15.5 / 32;
       const eyeCenterY = y + displaySize * 13.5 / 32 + bobPx;
       this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
+      this.focusAccessory.render(this.ctx, this.pomodoroPhase, eyeCenterX, eyeCenterY, displaySize);
     } else {
       this.drawFallback();
     }
@@ -416,6 +421,17 @@ export class PetRenderer {
    */
   setWeather(condition: WeatherCondition): void {
     this.weatherCondition = condition;
+  }
+
+  /**
+   * 设置番茄钟状态
+   */
+  setPomodoroState(state: PomodoroPhase): void {
+    this.pomodoroPhase = state;
+  }
+
+  getPomodoroState(): PomodoroPhase {
+    return this.pomodoroPhase;
   }
 }
 
