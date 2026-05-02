@@ -65,6 +65,7 @@ export class PomodoroTimer {
 
   stop(): void {
     this.running = false;
+    this.phase = 'idle';
     this.lastTimestamp = 0;
     this.justChanged = true;
     this.onTick?.(this.phase, this.remainingMs, this.totalMs, this.justChanged);

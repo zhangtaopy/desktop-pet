@@ -340,6 +340,7 @@ export class PetRenderer {
         this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
       }
       this.focusAccessory.render(this.ctx, this.pomodoroPhase, this.pomodoroRemainingMs, this.pomodoroTotalMs, eyeCenterX, eyeCenterY, displaySize);
+    } else {
       this.drawFallback();
     }
 
