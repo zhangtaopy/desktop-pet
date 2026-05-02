@@ -8,10 +8,11 @@ use tauri::{
 pub fn create_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let show_item = MenuItem::with_id(app, "show", "显示宠物", true, None::<&str>)?;
     let hide_item = MenuItem::with_id(app, "hide", "隐藏宠物", true, None::<&str>)?;
+    let pomodoro_item = MenuItem::with_id(app, "pomodoro", "番茄钟", true, None::<&str>)?;
     let toggle_menu_item = MenuItem::with_id(app, "toggle-menu-btn", "切换菜单按钮", true, None::<&str>)?;
     let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
 
-    let menu = Menu::with_items(app, &[&show_item, &hide_item, &toggle_menu_item, &quit_item])?;
+    let menu = Menu::with_items(app, &[&show_item, &hide_item, &pomodoro_item, &toggle_menu_item, &quit_item])?;
 
     // 尝试获取图标，优先使用默认窗口图标，否则从文件加载
     let icon = app.default_window_icon()
@@ -42,6 +43,9 @@ pub fn create_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                 if let Some(window) = app.get_webview_window("main") {
                     let _: Result<(), _> = window.hide();
                 }
+            }
+            "pomodoro" => {
+                let _ = app.emit("pomodoro-toggle", ());
             }
             "toggle-menu-btn" => {
                 // 发送事件到前端来切换菜单按钮

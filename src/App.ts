@@ -197,12 +197,17 @@ export class App {
       this.interactionManager.setup();
 
       // 13. 初始化菜单
-      this.menuManager = new MenuManager(petRenderer, this.dialogueManager, this.weatherService, this.pomodoroTimer);
+      this.menuManager = new MenuManager(petRenderer, this.dialogueManager, this.weatherService);
       this.menuManager.setup();
 
       // 14. 设置事件监听
       this.setupEventListeners();
       this.positionManager.setupEventListeners();
+
+      // 15. 监听托盘番茄钟事件
+      if (tauri) {
+        this.listenPomodoroTray();
+      }
 
       this.state = 'running';
       eventBus.emit('app:initialized', undefined);
@@ -255,8 +260,10 @@ export class App {
         this.lastWeatherFetch = now;
       }
 
-      // 对话气泡
-      this.showRandomDialogue();
+      // 对话气泡（专注时不显示随机对话）
+      if (this.pomodoroTimer.getPhase() !== 'focus' || !this.pomodoroTimer.isRunning()) {
+        this.showRandomDialogue();
+      }
 
       // 番茄钟
       this.pomodoroTimer.update(timestamp);
@@ -442,6 +449,24 @@ export class App {
     }
 
     this.weatherSynced = true;
+  }
+
+  private async listenPomodoroTray(): Promise<void> {
+    try {
+      const { listen } = await import('@tauri-apps/api/event');
+      const { petRenderer } = this.services;
+      const unlisten = await listen('pomodoro-toggle', () => {
+        if (this.pomodoroTimer.isRunning()) {
+          this.pomodoroTimer.stop();
+          petRenderer?.showBubble({ text: '番茄钟已停止', duration: 2000, priority: 'interaction' });
+        } else {
+          this.pomodoroTimer.startOrRestart();
+        }
+      });
+      this.cleanupFns.push(unlisten);
+    } catch {
+      // Tauri not available
+    }
   }
 }
 
