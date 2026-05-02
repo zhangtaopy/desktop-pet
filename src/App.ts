@@ -189,7 +189,7 @@ export class App {
       });
 
       // 12. 初始化交互管理
-      this.interactionManager = new InteractionManager(this.config.canvas, behavior);
+      this.interactionManager = new InteractionManager(this.config.canvas, behavior, petRenderer, this.pomodoroTimer);
       this.interactionManager.setup();
 
       // 13. 初始化菜单

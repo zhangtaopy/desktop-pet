@@ -4,6 +4,8 @@
  */
 
 import { PetBehavior } from '../behavior/PetBehavior';
+import { PetRenderer } from '../renderer/pet/PetRenderer';
+import { PomodoroTimer } from '../renderer/PomodoroTimer';
 import { initDrag } from '../drag';
 import { eventBus } from '../core/EventBus';
 
@@ -18,6 +20,8 @@ export class InteractionManager {
   constructor(
     private canvas: HTMLCanvasElement,
     private behavior: PetBehavior,
+    private petRenderer?: PetRenderer,
+    private pomodoroTimer?: PomodoroTimer,
   ) {}
 
   /**
@@ -81,6 +85,19 @@ export class InteractionManager {
       lastClickTime = now;
 
       this.behavior.startPetting();
+
+      // 计时器运行时点击显示剩余时间
+      if (this.pomodoroTimer?.isRunning()) {
+        const remaining = this.pomodoroTimer.getRemainingMs();
+        const mins = Math.ceil(remaining / 60000);
+        const phaseText = this.pomodoroTimer.getPhase() === 'focus' ? '专注' : '休息';
+        this.petRenderer?.showBubble({
+          text: `${phaseText}剩余 ${mins} 分钟`,
+          duration: 2000,
+          priority: 'interaction',
+        });
+        return;
+      }
 
       if (this.pettingTimer) clearTimeout(this.pettingTimer);
       this.pettingTimer = setTimeout(() => {
