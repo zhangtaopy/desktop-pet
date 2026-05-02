@@ -94,6 +94,7 @@ export class PetRenderer {
   private weatherCondition: WeatherCondition = 'unknown';
   private pomodoroPhase: PomodoroPhase = 'idle';
   private pomodoroRemainingMs: number = 0;
+  private pomodoroTotalMs: number = 0;
 
   constructor(config: PetRendererConfig) {
     this.canvas = config.canvas;
@@ -335,9 +336,10 @@ export class PetRenderer {
       const bobPx = this.getBobY() * scale;
       const eyeCenterX = x + displaySize * 15.5 / 32;
       const eyeCenterY = y + displaySize * 13.5 / 32 + bobPx;
-      this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
-      this.focusAccessory.render(this.ctx, this.pomodoroPhase, this.pomodoroRemainingMs, eyeCenterX, eyeCenterY, displaySize);
-    } else {
+      if (this.pomodoroPhase === 'idle') {
+        this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
+      }
+      this.focusAccessory.render(this.ctx, this.pomodoroPhase, this.pomodoroRemainingMs, this.pomodoroTotalMs, eyeCenterX, eyeCenterY, displaySize);
       this.drawFallback();
     }
 
@@ -427,9 +429,10 @@ export class PetRenderer {
   /**
    * 设置番茄钟状态
    */
-  setPomodoroState(state: PomodoroPhase, remainingMs: number = 0): void {
+  setPomodoroState(state: PomodoroPhase, remainingMs: number = 0, totalMs: number = 0): void {
     this.pomodoroPhase = state;
     this.pomodoroRemainingMs = remainingMs;
+    this.pomodoroTotalMs = totalMs;
   }
 
   getPomodoroState(): PomodoroPhase {

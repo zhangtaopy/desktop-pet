@@ -105,8 +105,8 @@ export class App {
 
       // 3.6 初始化番茄钟
       this.pomodoroTimer = new PomodoroTimer();
-      this.pomodoroTimer.setTickHandler((phase, remainingMs, _totalMs, justChanged) => {
-        petRenderer.setPomodoroState(phase, remainingMs);
+      this.pomodoroTimer.setTickHandler((phase, remainingMs, totalMs, justChanged) => {
+        petRenderer.setPomodoroState(phase, remainingMs, totalMs);
         if (justChanged) {
           if (phase === 'focus') {
             petRenderer.showBubble({ text: `专注开始！${DEFAULT_FOCUS_MIN} 分钟`, duration: 3000, priority: 'interaction' });
