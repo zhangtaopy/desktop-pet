@@ -93,6 +93,7 @@ export class PetRenderer {
   private focusAccessory: FocusAccessory = new FocusAccessory();
   private weatherCondition: WeatherCondition = 'unknown';
   private pomodoroPhase: PomodoroPhase = 'idle';
+  private pomodoroRemainingMs: number = 0;
 
   constructor(config: PetRendererConfig) {
     this.canvas = config.canvas;
@@ -335,7 +336,7 @@ export class PetRenderer {
       const eyeCenterX = x + displaySize * 15.5 / 32;
       const eyeCenterY = y + displaySize * 13.5 / 32 + bobPx;
       this.weatherAccessory.render(this.ctx, this.weatherCondition, eyeCenterX, eyeCenterY, displaySize);
-      this.focusAccessory.render(this.ctx, this.pomodoroPhase, eyeCenterX, eyeCenterY, displaySize);
+      this.focusAccessory.render(this.ctx, this.pomodoroPhase, this.pomodoroRemainingMs, eyeCenterX, eyeCenterY, displaySize);
     } else {
       this.drawFallback();
     }
@@ -426,12 +427,20 @@ export class PetRenderer {
   /**
    * 设置番茄钟状态
    */
-  setPomodoroState(state: PomodoroPhase): void {
+  setPomodoroState(state: PomodoroPhase, remainingMs: number = 0): void {
     this.pomodoroPhase = state;
+    this.pomodoroRemainingMs = remainingMs;
   }
 
   getPomodoroState(): PomodoroPhase {
     return this.pomodoroPhase;
+  }
+
+  showHearts(): void {
+    this.expression.showHeartsOverride = true;
+    setTimeout(() => {
+      this.expression.showHeartsOverride = false;
+    }, 2000);
   }
 }
 

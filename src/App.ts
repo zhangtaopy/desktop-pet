@@ -9,6 +9,7 @@ import { TimeManager } from './renderer/TimeManager';
 import { WeatherService } from './renderer/WeatherService';
 import { DialogueManager } from './renderer/DialogueManager';
 import { PomodoroTimer } from './renderer/PomodoroTimer';
+import { CYCLES_BEFORE_LONG_BREAK, DEFAULT_FOCUS_MIN, DEFAULT_SHORT_BREAK_MIN, DEFAULT_LONG_BREAK_MIN } from './renderer/PomodoroTimer';
 import { eventBus } from './core/EventBus';
 import {
   container,
@@ -104,15 +105,18 @@ export class App {
 
       // 3.6 初始化番茄钟
       this.pomodoroTimer = new PomodoroTimer();
-      this.pomodoroTimer.setTickHandler((phase, remainingMs, totalMs) => {
-        petRenderer.setPomodoroState(phase);
-        if (phase === 'focus' && remainingMs === totalMs) {
-          const mins = Math.ceil(totalMs / 60000);
-          petRenderer.showBubble({ text: `专注开始！${mins} 分钟`, duration: 3000, priority: 'interaction' });
-        } else if (phase === 'shortBreak' && remainingMs === totalMs) {
-          petRenderer.showBubble({ text: '休息一下~ 5 分钟', duration: 3000, priority: 'interaction' });
-        } else if (phase === 'longBreak' && remainingMs === totalMs) {
-          petRenderer.showBubble({ text: '完成4轮！长休息15分钟', duration: 4000, priority: 'interaction' });
+      this.pomodoroTimer.setTickHandler((phase, remainingMs, _totalMs, justChanged) => {
+        petRenderer.setPomodoroState(phase, remainingMs);
+        if (justChanged) {
+          if (phase === 'focus') {
+            petRenderer.showBubble({ text: `专注开始！${DEFAULT_FOCUS_MIN} 分钟`, duration: 3000, priority: 'interaction' });
+          } else if (phase === 'shortBreak') {
+            petRenderer.showBubble({ text: `休息 ${DEFAULT_SHORT_BREAK_MIN} 分钟~ 喝杯咖啡☕`, duration: 4000, priority: 'interaction' });
+            petRenderer.showHearts();
+          } else if (phase === 'longBreak') {
+            petRenderer.showBubble({ text: `完成 ${CYCLES_BEFORE_LONG_BREAK} 轮！长休息 ${DEFAULT_LONG_BREAK_MIN} 分钟`, duration: 4000, priority: 'interaction' });
+            petRenderer.showHearts();
+          }
         }
       });
 
@@ -229,7 +233,12 @@ export class App {
       const now = Date.now();
 
       if (!this.interactionManager.getIsDragging()) {
-        petBehavior.update(timestamp);
+        const inFocus = this.pomodoroTimer.isRunning() && this.pomodoroTimer.getPhase() === 'focus';
+        if (inFocus) {
+          petBehavior.forceIdle();
+        } else {
+          petBehavior.update(timestamp);
+        }
         petRenderer.setFlipX(petBehavior.getWalkDirection() < 0);
       }
 

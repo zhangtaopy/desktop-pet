@@ -24,24 +24,15 @@ export class InteractionManager {
     private pomodoroTimer?: PomodoroTimer,
   ) {}
 
-  /**
-   * 设置所有交互（拖拽 + 点击抚摸）
-   */
   setup(): void {
     this.setupDrag();
     this.setupClickPetting();
   }
 
-  /**
-   * 当前是否正在拖拽
-   */
   getIsDragging(): boolean {
     return this.isDragging;
   }
 
-  /**
-   * 清理资源
-   */
   destroy(): void {
     for (const cleanup of this.cleanupFns) {
       cleanup();
@@ -72,9 +63,6 @@ export class InteractionManager {
     this.behavior.stopPetting();
   }
 
-  /**
-   * 点击抚摸：仅在非拖拽的点击（mouseup）时触发，拖拽不触发抚摸
-   */
   private setupClickPetting(): void {
     let lastClickTime = 0;
 
@@ -84,20 +72,16 @@ export class InteractionManager {
       if (now - lastClickTime < 300) return;
       lastClickTime = now;
 
-      this.behavior.startPetting();
-
-      // 计时器运行时点击显示剩余时间
       if (this.pomodoroTimer?.isRunning()) {
-        const remaining = this.pomodoroTimer.getRemainingMs();
-        const mins = Math.ceil(remaining / 60000);
-        const phaseText = this.pomodoroTimer.getPhase() === 'focus' ? '专注' : '休息';
         this.petRenderer?.showBubble({
-          text: `${phaseText}剩余 ${mins} 分钟`,
+          text: `还剩 ${Math.ceil(this.pomodoroTimer.getRemainingMs() / 60000)} 分钟`,
           duration: 2000,
           priority: 'interaction',
         });
         return;
       }
+
+      this.behavior.startPetting();
 
       if (this.pettingTimer) clearTimeout(this.pettingTimer);
       this.pettingTimer = setTimeout(() => {

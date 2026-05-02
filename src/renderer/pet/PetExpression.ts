@@ -24,16 +24,13 @@ export interface ExpressionState {
  * 根据动画类型和帧数计算表情状态
  */
 export class PetExpression {
-  /**
-   * 计算当前帧的表情状态
-   * @param animation 当前动画类型
-   * @param frame 当前帧索引
-   */
+  showHeartsOverride: boolean = false;
+
   getExpression(animation: PetAnimation, frame: number): ExpressionState {
     const state: ExpressionState = {
       eyes: 'open',
       showBlush: false,
-      showHearts: false,
+      showHearts: this.showHeartsOverride || false,
       showSleepBubble: false,
     };
 

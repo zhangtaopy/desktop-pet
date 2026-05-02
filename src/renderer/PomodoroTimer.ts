@@ -5,6 +5,8 @@ export const DEFAULT_SHORT_BREAK_MIN = 5;
 export const DEFAULT_LONG_BREAK_MIN = 15;
 export const CYCLES_BEFORE_LONG_BREAK = 4;
 
+export type TickCallback = (phase: PomodoroPhase, remainingMs: number, totalMs: number, justChanged: boolean) => void;
+
 export class PomodoroTimer {
   private phase: PomodoroPhase = 'idle';
   private remainingMs: number = 0;
@@ -12,12 +14,13 @@ export class PomodoroTimer {
   private cyclesCompleted: number = 0;
   private running: boolean = false;
   private lastTimestamp: number = 0;
+  private justChanged: boolean = false;
 
   private focusMs: number;
   private shortBreakMs: number;
   private longBreakMs: number;
 
-  private onTick: ((phase: PomodoroPhase, remainingMs: number, totalMs: number) => void) | null = null;
+  private onTick: TickCallback | null = null;
 
   constructor(focusMin = DEFAULT_FOCUS_MIN, shortBreakMin = DEFAULT_SHORT_BREAK_MIN, longBreakMin = DEFAULT_LONG_BREAK_MIN) {
     this.focusMs = focusMin * 60 * 1000;
@@ -25,7 +28,7 @@ export class PomodoroTimer {
     this.longBreakMs = longBreakMin * 60 * 1000;
   }
 
-  setTickHandler(handler: (phase: PomodoroPhase, remainingMs: number, totalMs: number) => void): void {
+  setTickHandler(handler: TickCallback): void {
     this.onTick = handler;
   }
 
@@ -55,13 +58,17 @@ export class PomodoroTimer {
     this.totalMs = this.focusMs;
     this.running = true;
     this.lastTimestamp = 0;
-    this.onTick?.(this.phase, this.remainingMs, this.totalMs);
+    this.justChanged = true;
+    this.onTick?.(this.phase, this.remainingMs, this.totalMs, this.justChanged);
+    this.justChanged = false;
   }
 
   stop(): void {
     this.running = false;
     this.lastTimestamp = 0;
-    this.onTick?.(this.phase, this.remainingMs, this.totalMs);
+    this.justChanged = true;
+    this.onTick?.(this.phase, this.remainingMs, this.totalMs, this.justChanged);
+    this.justChanged = false;
   }
 
   update(timestamp: number): void {
@@ -84,9 +91,10 @@ export class PomodoroTimer {
     if (this.remainingMs <= 0) {
       this.remainingMs = 0;
       this.advance();
+      return;
     }
 
-    this.onTick?.(this.phase, this.remainingMs, this.totalMs);
+    this.onTick?.(this.phase, this.remainingMs, this.totalMs, false);
   }
 
   private advance(): void {
@@ -117,7 +125,9 @@ export class PomodoroTimer {
     }
 
     this.lastTimestamp = 0;
-    this.onTick?.(this.phase, this.remainingMs, this.totalMs);
+    this.justChanged = true;
+    this.onTick?.(this.phase, this.remainingMs, this.totalMs, this.justChanged);
+    this.justChanged = false;
   }
 
   reset(): void {
@@ -127,6 +137,5 @@ export class PomodoroTimer {
     this.totalMs = 0;
     this.cyclesCompleted = 0;
     this.lastTimestamp = 0;
-    this.onTick?.(this.phase, this.remainingMs, this.totalMs);
   }
 }
