@@ -16,7 +16,6 @@ export class FocusAccessory {
     ctx.imageSmoothingEnabled = false;
 
     const s = displaySize / 32;
-    const mins = Math.max(0, Math.ceil(remainingMs / 60000));
     const percent = totalMs > 0 ? remainingMs / totalMs : 0;
     const diameter = 13 * s;
     const radius = diameter / 2;
@@ -48,8 +47,16 @@ export class FocusAccessory {
     ctx.stroke();
 
     // number
-    const text = String(mins);
-    ctx.font = `bold ${7 * s}px "PingFang SC", sans-serif`;
+    let text: string;
+    if (remainingMs < 60000) {
+      const secs = Math.max(0, Math.ceil(remainingMs / 1000));
+      text = String(secs);
+    } else {
+      const mins = Math.ceil(remainingMs / 60000);
+      text = String(mins);
+    }
+    const fontSize = remainingMs < 60000 ? 5.5 * s : 7 * s;
+    ctx.font = `bold ${fontSize}px "PingFang SC", sans-serif`;
     ctx.fillStyle = '#FFFFFF';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
