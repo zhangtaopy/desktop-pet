@@ -229,13 +229,7 @@ export class PetBehavior {
   startPetting(): void {
     this.interaction.startPetting();
     this.stateMachine.setIsBeingPetted(true);
-
-    if (this.stateMachine.getState() === PetState.Sleeping) {
-      // 被叫醒
-      this.stateMachine.forceState(PetState.Petting);
-    } else {
-      this.stateMachine.forceState(PetState.Petting);
-    }
+    this.stateMachine.forceState(PetState.Petting);
   }
 
   /**

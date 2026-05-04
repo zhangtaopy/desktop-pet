@@ -36,3 +36,6 @@ Thumbs.db
 
 # Claude Code 配置（可选，看你需求）
 .claude/
+
+# 工具生成的知识图谱
+graphify-out/

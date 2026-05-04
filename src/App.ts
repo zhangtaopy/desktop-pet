@@ -110,6 +110,7 @@ export class App {
         if (justChanged) {
           if (phase === 'focus') {
             petRenderer.showBubble({ text: `专注开始！${DEFAULT_FOCUS_MIN} 分钟`, duration: 3000, priority: 'interaction' });
+            behavior.forceIdle();
           } else if (phase === 'shortBreak') {
             petRenderer.showBubble({ text: `休息 ${DEFAULT_SHORT_BREAK_MIN} 分钟~ 喝杯咖啡☕`, duration: 4000, priority: 'interaction' });
             petRenderer.showHearts();
@@ -238,9 +239,8 @@ export class App {
       const now = Date.now();
 
       if (!this.interactionManager.getIsDragging()) {
-        const inFocus = this.pomodoroTimer.isRunning() && this.pomodoroTimer.getPhase() === 'focus';
-        if (inFocus) {
-          petBehavior.forceIdle();
+        if (this.pomodoroTimer.isRunning() && this.pomodoroTimer.getPhase() === 'focus') {
+          // 专注时宠物保持空闲，不更新行为
         } else {
           petBehavior.update(timestamp);
         }
